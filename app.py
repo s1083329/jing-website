@@ -16,7 +16,7 @@ def login_required(f):
 app = Flask(__name__)
 
 # session需要secret key
-app.config["SECRET_KEY"] = app.config["SECRET_KEY"] = "your_secret_key"
+app.config["SECRET_KEY"] =  "your_secret_key"
 
 # database設定
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
