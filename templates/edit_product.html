@@ -1,0 +1,28 @@
+<h1>修改商品</h1>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<a href="{{ url_for('admin_products') }}"><i class="fa-solid fa-arrow-left"></i>  返回商品管理</a>
+<br><br>
+
+<form method="POST">
+    <!-- 只顯示，不能改 -->
+    {% if product.image %}
+        <img src="{{ url_for('static', filename='img/' + product.image) }}" width="200">
+    {% endif %}
+
+    <br><br>
+    商品名稱：<br>
+    <input name="name" value="{{ product.name }}">
+    <br><br>
+    價格：<br>
+    <input name="price" value="{{ product.price }}">
+    <br><br>
+    商品介紹：<br>
+    <textarea name="description">{{ product.description }}</textarea>
+
+    <!-- <input name="image" value="{{ product.image }}"> -->
+    
+    <br><br>
+    <button type="submit">更新</button>
+
+</form>

@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# 虛擬環境
+venv/
+
+# 資料庫
+*.db
+
+# 環境變數
+.env
+
+# 上傳圖片（關鍵🔥）
+static/img/
+
+# Mac
+.DS_Store

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="/img/icon.jpeg" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='img/icon.jpeg') }}" type="image/x-icon">
     <title>聯絡我們 | 菁 燕窩</title>
     <style>
         body {
@@ -52,16 +52,16 @@
         菁 燕窩 | 聯絡我們
     </header>
     <nav>
-        <a href="index.html">首頁</a>
-        <a href="products.html">產品介紹</a>
-        <a href="certificates.html">認證證書</a>
-        <a href="contact.html">聯絡我們</a>
+        <a href="{{ url_for('home') }}">首頁</a>
+        <a href="{{ url_for('products') }}">產品介紹</a>
+        <a href="{{ url_for('certificates') }}">認證證書</a>
+        <a href="{{ url_for('contact') }}">聯絡我們</a>
     </nav>
     <div class="container">
         <h2>聯絡我們</h2>
         <p>地址：嘉義市東區興安街131號</p>
         <p>聯絡電話：0901-021-516</p>
-        <img src="./img/螢幕擷取畫面 2024-12-14 221248.png" alt="名片" class="contact-image">
+        <img src="{{ url_for('static', filename='img/螢幕擷取畫面 2024-12-14 221248.png') }}" alt="名片" class="contact-image">
     </div>
 </body>
 </html>

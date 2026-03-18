@@ -1,0 +1,27 @@
+<h1>新增商品</h1>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- 返回按鈕 -->
+<a href="{{ url_for('admin_products') }}"><i class="fa-solid fa-arrow-left"></i> 返回商品管理</a>
+
+<br><br>
+
+<form method="POST" enctype="multipart/form-data">
+    商品名稱：<br>
+    <input name="name" placeholder="Product Name">
+    <br><br>
+
+    價格：<br>
+    <input name="price" placeholder="Price">
+    <br><br>
+
+    商品介紹：<br>
+    <textarea name="description" placeholder="Description"></textarea>
+    <br><br>
+
+    上傳商品圖：<br>
+    <input type="file" name="image">
+    <br><br>
+
+    <button type="submit">新增</button>
+</form>

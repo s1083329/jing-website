@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='img/icon.jpeg') }}" type="image/x-icon">
+    <title>產品介紹 | 菁 燕窩</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+        }
+
+        header {
+            background-color: #b22222;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 24px;
+        }
+
+        nav {
+            background: #d32f2f;
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background: white;
+        }
+
+        .product {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #fafafa;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .product img {
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .product h3 {
+            margin-top: 15px;
+            font-size: 22px;
+            color: #333;
+        }
+
+        .price {
+            font-weight: bold;
+            color: #b22222;
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    菁 燕窩 | 產品介紹
+</header>
+
+<nav>
+    <a href="{{ url_for('home') }}">首頁</a>
+    <a href="{{ url_for('products') }}">產品介紹</a>
+    <a href="{{ url_for('certificates') }}">認證證書</a>
+    <a href="{{ url_for('contact') }}">聯絡我們</a>
+</nav>
+
+<div class="container">
+
+    <h2 style="text-align: center;">產品介紹</h2>
+
+    {% for product in products %}
+
+    <div class="product">
+
+        <img src="{{ url_for('static', filename='img/' + product.image) }}" alt="{{ product.name }}">
+
+        <h3>{{ product.name }}</h3>
+        
+        <p>{{ product.description }}</p>
+
+        <p class="price">特惠價：{{ product.price }}元</p>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+</body>
+</html>

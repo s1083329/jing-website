@@ -1,0 +1,17 @@
+<h1>菁 燕窩管理系統登入</h1>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<p style="color:red;">{{ messages[0] }}</p>
+{% endif %}
+{% endwith %}
+
+<form method="POST">
+
+    <input type="text" name="username" placeholder="帳號">
+
+    <input type="password" name="password" placeholder="密碼">
+
+    <button type="submit">登入</button>
+
+</form>

@@ -1,0 +1,88 @@
+<h1>產品列表</h1>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- Top Menu -->
+<div style="margin-bottom: 20px;">
+
+    
+    <!-- {# <a href="{{ url_for('admin_dashboard') }}"> #}
+        <i class="fa-solid fa-arrow-left"></i> 返回
+    </a> -->
+
+    <!-- &nbsp; | &nbsp; -->
+
+    <a href="{{ url_for('add_product') }}">
+        <i class="fa-solid fa-plus"></i> 新增產品
+    </a>
+
+    &nbsp; | &nbsp;
+
+    <a href="{{ url_for('admin_logout') }}">
+        <i class="fa-solid fa-right-from-bracket"></i> 登出系統
+    </a>
+
+</div>
+
+<hr>
+
+<!-- Product List -->
+<ul style="list-style: none; padding: 0;">
+
+{% for product in products %}
+
+<li style="
+    margin-bottom: 25px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+">
+
+    <!-- Image -->
+    <img src="{{ url_for('static', filename='img/' + product.image) }}"
+         alt="{{ product.name }}"
+         style="width: 120px; border-radius: 8px;">
+
+    <!-- Info -->
+    <div style="flex:1;">
+
+        <strong style="font-size: 18px;">{{ product.name }}</strong><br>
+
+        <span style="color: #b22222; font-weight: bold;">
+            ${{ product.price }}
+        </span><br>
+
+        <span style="color: #555;">
+            {{ product.description }}
+        </span>
+
+    </div>
+
+    <!-- Actions -->
+    <div>
+
+        <a href="{{ url_for('edit_product', id=product.id) }}">
+            <i class="fa-solid fa-pen-to-square"></i>
+            修改
+        </a>
+
+        &nbsp;
+
+        <br><br>
+
+        <a href="{{ url_for('delete_product', id=product.id) }}"
+           onclick="return confirm('確定要刪除嗎？')">
+            <i class="fa-solid fa-trash"></i>
+            刪除
+        </a>
+
+    </div>
+
+</li>
+
+{% endfor %}
+
+</ul>

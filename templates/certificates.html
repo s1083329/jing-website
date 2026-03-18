@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="/img/icon.jpeg" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='img/icon.jpeg') }}" type="image/x-icon">
     <title>認證證書 | 菁 燕窩</title>
     <style>
         body {
@@ -13,6 +13,7 @@
             padding: 0;
             background-color: #f8f8f8;
         }
+
         header {
             background-color: #b22222;
             color: white;
@@ -20,17 +21,20 @@
             padding: 15px;
             font-size: 24px;
         }
+
         nav {
             background: #d32f2f;
             padding: 10px;
             text-align: center;
         }
+
         nav a {
             color: white;
             margin: 0 15px;
             text-decoration: none;
             font-size: 18px;
         }
+
         .container {
             width: 80%;
             margin: auto;
@@ -38,35 +42,47 @@
             background: white;
             text-align: center;
         }
+
         .certificate img {
             width: 80%;
             max-width: 500px;
         }
+
         .certificate-slider {
             position: relative;
             max-width: 500px;
             margin: auto;
         }
+
         .certificate-slider img {
             width: 100%;
             display: none;
         }
+
         .certificate-slider img.active {
             display: block;
         }
-        .prev, .next {
+
+        .prev,
+        .next {
             cursor: pointer;
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.5);
             color: white;
             padding: 10px;
             border: none;
             font-size: 18px;
         }
-        .prev { left: 0; }
-        .next { right: 0; }
+
+        .prev {
+            left: 0;
+        }
+
+        .next {
+            right: 0;
+        }
     </style>
 </head>
 
@@ -75,30 +91,30 @@
         菁 燕窩 | 認證證書
     </header>
     <nav>
-        <a href="index.html">首頁</a>
-        <a href="products.html">產品介紹</a>
-        <a href="certificates.html">認證證書</a>
-        <a href="contact.html">聯絡我們</a>
+        <a href="{{ url_for('home') }}">首頁</a>
+        <a href="{{ url_for('products') }}">產品介紹</a>
+        <a href="{{ url_for('certificates') }}">認證證書</a>
+        <a href="{{ url_for('contact') }}">聯絡我們</a>
     </nav>
     <div class="container">
         <h2>專業證書</h2>
         <div class="certificate">
-            <img src="./img/螢幕擷取畫面 2024-11-13 224500.png" alt="專業證書">
+            <img src="{{ url_for('static', filename='img/螢幕擷取畫面 2024-11-13 224500.png') }}" alt="專業證書">
             <p>燕屋設計與養殖技術證書。</p>
         </div>
-        
+
         <h2>檢測報告</h2>
         <div class="certificate-slider">
             <button class="prev" onclick="changeSlide(-1)">&#10094;</button>
-            <img src="./img/51698_0.jpg" class="active" alt="檢測報告 1">
-            <img src="./img/51700_0.jpg" alt="檢測報告 2">
-            <img src="./img/51699_0.jpg" alt="檢測報告 3">
+            <img src="{{ url_for('static', filename='img/51698_0.jpg') }}" class="active" alt="檢測報告 1">
+            <img src="{{ url_for('static', filename='img/51700_0.jpg') }}" alt="檢測報告 2">
+            <img src="{{ url_for('static', filename='img/51699_0.jpg') }}" alt="檢測報告 3">
             <button class="next" onclick="changeSlide(1)">&#10095;</button>
         </div>
-        
+
         <h2>保險證書</h2>
         <div class="certificate">
-            <img src="./img/51702_0.jpg" alt="保險證書">
+            <img src="{{ url_for('static', filename='img/51702_0.jpg') }}" alt="保險證書">
             <p>產品保險，讓您安心食用。</p>
         </div>
     </div>
@@ -112,4 +128,5 @@
         }
     </script>
 </body>
+
 </html>
