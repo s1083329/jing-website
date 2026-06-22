@@ -11,8 +11,9 @@ venv/
 # 環境變數
 .env
 
-# 上傳圖片（關鍵🔥）
+# 上傳圖片
 static/img/
+static/productimg/
 
 # Mac
 .DS_Store

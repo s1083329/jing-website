@@ -4,6 +4,25 @@ import os
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
 from functools import wraps
+import boto3
+import os
+import uuid
+from dotenv import load_dotenv
+
+load_dotenv()
+R2_ACCESS_KEY = os.getenv("R2_ACCESS_KEY")
+R2_SECRET_KEY = os.getenv("R2_SECRET_KEY")
+R2_BUCKET = os.getenv("R2_BUCKET")
+R2_ENDPOINT = os.getenv("R2_ENDPOINT")
+R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+s3 = boto3.client(
+    "s3",
+    endpoint_url=R2_ENDPOINT,
+    aws_access_key_id=R2_ACCESS_KEY,
+    aws_secret_access_key=R2_SECRET_KEY,
+)
 
 def login_required(f):
     @wraps(f)
@@ -16,17 +35,19 @@ def login_required(f):
 app = Flask(__name__)
 
 # session需要secret key
-app.config["SECRET_KEY"] =  "your_secret_key"
+app.config["SECRET_KEY"] =  os.getenv("SECRET_KEY")
 
 # database設定
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-# 上傳圖片的資料夾
-UPLOAD_FOLDER = "static/img"
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
 db = SQLAlchemy(app)
+
+# Gemini API設定
+import google.generativeai as genai
+from PIL import Image
+
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 # Admin資料表
 class Admin(db.Model):
@@ -40,6 +61,42 @@ class Product(db.Model):
     price = db.Column(db.Integer)
     description = db.Column(db.Text)
     image = db.Column(db.String(200))
+
+def generate_description(name, price, image_file, description):
+
+    image = Image.open(image_file)
+
+    prompt = f"""
+    商品名稱：{name}
+    商品價格：{price}元
+
+    商品背景補充：
+
+    {description}
+
+    如果商品背景補充有內容，
+    請以其為主要依據進行潤飾與擴寫。
+
+    如果商品背景補充為空白，
+    請根據商品圖片、名稱與價格自行生成完整商品介紹。
+
+    要求：
+
+    1. 使用繁體中文
+    2. 長度約80~150字
+    3. 不要使用Markdown格式
+    4. 不要出現*、#、**等符號
+    5. 不要列點
+    6. 不要虛構醫療功效
+    7. 直接輸出商品介紹內容
+    """
+
+    response = model.generate_content([
+        prompt,
+        image
+    ])
+
+    return response.text.strip()
 
 @app.route("/")
 def home():
@@ -115,15 +172,23 @@ def add_product():
 
         file = request.files["image"]
 
-        filename = secure_filename(file.filename)
+        if file:
+            filename = str(uuid.uuid4()) + "_" + file.filename
 
-        file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+            s3.upload_fileobj(
+                file,
+                R2_BUCKET,
+                filename,
+                ExtraArgs={"ContentType": file.content_type}
+            )
+
+            image_url = f"{R2_PUBLIC_URL}/{filename}"
 
         product = Product(
             name=name,
             price=price,
             description=description,
-            image=filename
+            image=image_url
         )
 
         db.session.add(product)
@@ -140,21 +205,13 @@ def delete_product(id):
     product = Product.query.get(id)
 
     if product:
-        image_name = product.image
+        image_name = product.image.replace(R2_PUBLIC_URL+ "/", "")
 
         # 先刪資料庫
         db.session.delete(product)
         db.session.commit()
 
-        # 檢查是否還有其他產品用這張圖
-        still_used = Product.query.filter_by(image=image_name).first()
-
-        if not still_used:
-            import os
-            image_path = os.path.join("static/img", image_name)
-
-            if os.path.exists(image_path):
-                os.remove(image_path)
+        s3.delete_object(Bucket=R2_BUCKET, Key=image_name)
 
     return redirect(url_for("admin_products"))
 
@@ -177,5 +234,32 @@ def edit_product(id):
 
     return render_template("edit_product.html", product=product)
 
+@app.route("/admin/generate-description", methods=["POST"])
+@login_required
+def generate_product_description():
+
+    name = request.form["name"]
+    price = request.form["price"]
+    image = request.files["image"]
+    description = request.form.get("description", "")
+
+    generated = generate_description(
+    name,
+    price,
+    image,
+    description
+    )
+
+    return {"description": generated}
+    #sleep模擬延遲
+    # import time
+    # time.sleep(2)
+        
+    # return {
+
+    #     "description": "這是一段測試商品介紹，確認前端回填功能是否正常。"
+
+    # }
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

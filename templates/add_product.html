@@ -1,27 +1,241 @@
-<h1>新增商品</h1>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<!-- 返回按鈕 -->
-<a href="{{ url_for('admin_products') }}"><i class="fa-solid fa-arrow-left"></i> 返回商品管理</a>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-<br><br>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f5f5f5;
+    color: #1a1a1a;
+  }
 
-<form method="POST" enctype="multipart/form-data">
-    商品名稱：<br>
-    <input name="name" placeholder="Product Name">
-    <br><br>
+  .page-wrap {
+    max-width: 640px;
+    margin: 40px auto;
+    padding: 0 20px 60px;
+  }
 
-    價格：<br>
-    <input name="price" placeholder="Price">
-    <br><br>
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #555;
+    text-decoration: none;
+    margin-bottom: 28px;
+  }
+  .back-link:hover { color: #1a1a1a; }
 
-    商品介紹：<br>
-    <textarea name="description" placeholder="Description"></textarea>
-    <br><br>
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 28px;
+  }
 
-    上傳商品圖：<br>
-    <input type="file" name="image">
-    <br><br>
+  .form-card {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
 
-    <button type="submit">新增</button>
-</form>
+  .field { display: flex; flex-direction: column; gap: 6px; }
+
+  label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+  }
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  textarea:focus { border-color: #999; background: #fff; }
+
+  textarea {
+    min-height: 160px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .file-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    background: #fafafa;
+    transition: border-color 0.15s;
+  }
+  .file-label:hover { border-color: #888; color: #333; }
+  input[type="file"] { display: none; }
+
+  #preview-container {
+    display: none;
+    margin-top: 10px;
+  }
+  #preview {
+    width: 100%;
+    max-height: 240px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1px solid #e5e5e5;
+  }
+
+  .btn-ai {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #444;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+    align-self: flex-start;
+  }
+  .btn-ai:hover { background: #e5e5e5; }
+  .btn-ai:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-submit {
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    background: #1a1a1a;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-submit:hover { background: #333; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 0;
+  }
+</style>
+
+<div class="page-wrap">
+
+  <a class="back-link" href="{{ url_for('admin_products') }}">
+    <i class="fa-solid fa-arrow-left"></i> 返回商品管理
+  </a>
+
+  <h1>新增商品</h1>
+
+  <form method="POST" enctype="multipart/form-data" class="form-card">
+
+    <div class="field">
+      <label>商品名稱</label>
+      <input type="text" name="name" placeholder="例：燕窩">
+    </div>
+
+    <div class="field">
+      <label>價格（NT$）</label>
+      <input type="number" name="price" placeholder="0">
+    </div>
+
+    <div class="field">
+      <label>商品圖片</label>
+      <label class="file-label" for="image">
+        <i class="fa-solid fa-image"></i>
+        <span id="file-label-text">選擇圖片</span>
+      </label>
+      <input type="file" name="image" id="image" accept="image/*" onchange="previewImage()">
+      <div id="preview-container">
+        <img id="preview" src="" alt="預覽圖片">
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="field">
+      <label>商品介紹</label>
+        <textarea id="description" name="description" placeholder="商品資訊補充（可空白）"></textarea>
+      <button class="btn-ai" id="ai-btn" type="button" onclick="generateDescription()">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> AI 生成介紹
+      </button>
+    </div>
+
+    <button type="submit" class="btn-submit" onclick="return checkForm()">新增商品</button>
+
+  </form>
+</div>
+
+<script>
+function previewImage() {
+  const file = document.getElementById("image").files[0];
+  if (!file) return;
+
+  const preview = document.getElementById("preview");
+  const container = document.getElementById("preview-container");
+  const label = document.getElementById("file-label-text");
+
+  preview.src = URL.createObjectURL(file);
+  container.style.display = "block";
+  label.textContent = file.name;
+}
+
+function checkForm() {
+  const image = document.getElementById("image").files[0];
+  if (!image) {
+    alert("請先選擇商品圖片");
+    return false;
+  }
+  return true;
+}
+
+async function generateDescription() {
+  const name = document.querySelector("input[name='name']").value;
+  const price = document.querySelector("input[name='price']").value;
+  const image = document.querySelector("input[name='image']").files[0];
+
+  if (!name || !price) { alert("請先輸入商品名稱與價格"); return; }
+  if (!image) { alert("請先選擇商品圖片"); return; }
+
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("price", price);
+  formData.append("image", image);
+  formData.append("description", document.getElementById("description").value);
+
+  const btn = document.getElementById("ai-btn");
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 生成中...';
+
+  try {
+    const res = await fetch("/admin/generate-description", { method: "POST", body: formData });
+    const data = await res.json();
+    document.getElementById("description").value = data.description;
+  } catch(e) {
+    alert("AI 生成失敗，請稍後再試");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> AI 生成介紹';
+  }
+}
+</script>
