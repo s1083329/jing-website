@@ -9,7 +9,7 @@ COPY app.py ./
 COPY templates ./templates
 COPY static/css ./static/css
 COPY static/js ./static/js
-RUN mkdir -p instance static/img static/productimg && chown -R app:app /app
+RUN mkdir -p instance static/img && chown -R app:app /app
 USER app
 EXPOSE 8000
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "4", "--timeout", "120", "--access-logfile", "-", "--error-logfile", "-", "app:app"]

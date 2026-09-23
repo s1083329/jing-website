@@ -21,7 +21,7 @@ Conda 與 Docker 仍有作業系統差異，上線前應在 Docker 驗證。
 ```sh
 cp .env.example .env
 chmod 600 .env
-mkdir -p instance static/img static/productimg
+mkdir -p instance static/img
 python -c 'import secrets; print(secrets.token_hex(32))'
 ```
 
@@ -56,7 +56,6 @@ python -m flask --app app run --debug --port=5001
 | API keys、SECRET_KEY | 主機 `.env`，啟動時注入 | 保留 |
 | 商品、管理員 | 主機 `instance/database.db` | 保留 |
 | 首頁／證書圖片 | 主機 `static/img/` | 保留，唯讀掛載 |
-| 舊商品圖片 | 主機 `static/productimg/` | 保留，唯讀掛載 |
 | 新商品圖片 | R2 bucket | 不受容器更新影響 |
 
 Docker 不會取代 SSH 或 Git；SSH 用於管理伺服器，Git 用於取得程式，Docker 統一執行環境與版本。
@@ -73,7 +72,7 @@ Docker 不會取代 SSH 或 Git；SSH 用於管理伺服器，Git 用於取得�
 ```sh
 cp .env.example .env
 chmod 600 .env
-mkdir -p instance static/img static/productimg
+mkdir -p instance static/img
 ```
 
 填入隨機 `SECRET_KEY`（範例檔有產生指令）。需要圖片上傳或 AI 功能時填入各自的開發用 keys；未填時仍可瀏覽及管理既有資料，但外部功能不可用。
@@ -99,8 +98,8 @@ macOS Docker Desktop 使用檔案共享處理掛載權限。
 先確認原服務的 systemd unit、程式目錄、資料庫位置和 Nginx upstream；此 repository 未包含這些正式機資訊。
 
 1. 安裝 Docker Engine 與 Compose plugin，檢查 `docker compose version`。
-2. 把包含這些 Docker 設定的 Git commit 部署至伺服器。可沿用原專案目錄；保留原 `.env`、`instance`、`static/img`、`static/productimg`。
-3. 若改用新目錄，先建立目錄、複製 `.env` 和兩個圖片資料夾。SQLite 必須在停止舊服務寫入後複製，或使用下方備份工具產生一致快照；不要只複製正在寫入的 `.db` 而漏掉 WAL。
+2. 把包含這些 Docker 設定的 Git commit 部署至伺服器。可沿用原專案目錄；保留原 `.env`、`instance`、`static/img`。
+3. 若改用新目錄，先建立目錄、複製 `.env` 和`static/img` 圖片資料夾。SQLite 必須在停止舊服務寫入後複製，或使用下方備份工具產生一致快照；不要只複製正在寫入的 `.db` 而漏掉 WAL。
 4. 在正式 `.env` 設定 `SESSION_COOKIE_SECURE=true`（對外必須為 HTTPS），保留原 `SECRET_KEY` 以維持 session；`APP_PORT=8000`，若被占用可改成其他閒置 port。容器固定讀 `/app/instance/database.db`。
 5. 確認資料庫與所有網站圖片存在。`static/img` 未納入 Git，只有 git clone 不會取得這些圖片。
 

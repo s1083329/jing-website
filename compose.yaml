@@ -24,12 +24,6 @@ services:
         read_only: true
         bind:
           create_host_path: false
-      - type: bind
-        source: ./static/productimg
-        target: /app/static/productimg
-        read_only: true
-        bind:
-          create_host_path: false
     restart: unless-stopped
     init: true
     read_only: true
