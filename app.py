@@ -5,7 +5,7 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
 from functools import wraps
 import boto3
-import os
+import click
 import uuid
 from dotenv import load_dotenv
 
@@ -22,7 +22,7 @@ s3 = boto3.client(
     endpoint_url=R2_ENDPOINT,
     aws_access_key_id=R2_ACCESS_KEY,
     aws_secret_access_key=R2_SECRET_KEY,
-)
+) if R2_ACCESS_KEY and R2_SECRET_KEY else None
 
 def login_required(f):
     @wraps(f)
@@ -35,10 +35,13 @@ def login_required(f):
 app = Flask(__name__)
 
 # session需要secret key
-app.config["SECRET_KEY"] =  os.getenv("SECRET_KEY")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+if not app.config["SECRET_KEY"]:
+    raise RuntimeError("SECRET_KEY must be configured in .env")
+app.config["SESSION_COOKIE_SECURE"] = os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true"
 
 # database設定
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///database.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
@@ -61,6 +64,38 @@ class Product(db.Model):
     price = db.Column(db.Integer)
     description = db.Column(db.Text)
     image = db.Column(db.String(200))
+
+@app.cli.command("init-db")
+def init_db():
+    """Create missing tables; never erase existing records."""
+    db.create_all()
+    click.echo("Database tables ready.")
+
+
+@app.cli.command("create-admin")
+@click.argument("username")
+@click.password_option()
+def create_admin(username, password):
+    """Create an administrator without storing plaintext passwords."""
+    from werkzeug.security import generate_password_hash
+    if Admin.query.filter_by(username=username).first():
+        raise click.ClickException("Administrator already exists.")
+    db.session.add(Admin(username=username, password=generate_password_hash(password)))
+    db.session.commit()
+    click.echo("Administrator created.")
+
+
+@app.route("/healthz")
+def health():
+    # Verify the actual schema, not just that the HTTP process is alive.
+    try:
+        db.session.execute(db.select(Product.id).limit(1))
+        db.session.execute(db.select(Admin.id).limit(1))
+    except Exception:
+        db.session.rollback()
+        return {"status": "unhealthy"}, 503
+    return {"status": "ok"}
+
 
 def generate_description(name, price, image_file, description):
 

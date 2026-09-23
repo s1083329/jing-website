@@ -1,0 +1,11 @@
+services:
+  web:
+    command: ["flask", "--app", "app", "run", "--debug", "--host=0.0.0.0", "--port=8000"]
+    environment:
+      SESSION_COOKIE_SECURE: "false"
+    volumes:
+      - ./app.py:/app/app.py:ro
+      - ./templates:/app/templates:ro
+      - ./static/css:/app/static/css:ro
+      - ./static/js:/app/static/js:ro
+    restart: "no"

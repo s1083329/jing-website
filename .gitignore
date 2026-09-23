@@ -10,6 +10,14 @@ venv/
 
 # 環境變數
 .env
+.env.*
+.venv/
+backups/
+*.db-*
+*.sqlite*
+.ssh/
+*.pem
+*.key
 
 # 上傳圖片
 static/img/

@@ -1,0 +1,52 @@
+name: jing
+services:
+  web:
+    # Match the existing VPS database owner (ubuntu).
+    user: "1000:1000"
+    image: jing-website:${IMAGE_TAG:-local}
+    build: .
+    env_file:
+      - path: .env
+        format: raw
+    environment:
+      DATABASE_URL: sqlite:////app/instance/database.db
+    ports:
+      - "127.0.0.1:${APP_PORT:-8000}:8000"
+    volumes:
+      - type: bind
+        source: ./instance
+        target: /app/instance
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./static/img
+        target: /app/static/img
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./static/productimg
+        target: /app/static/productimg
+        read_only: true
+        bind:
+          create_host_path: false
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -1,0 +1,15 @@
+**
+!requirements.txt
+!app.py
+!templates/
+!templates/**
+!static/
+!static/css/
+!static/css/**
+!static/js/
+!static/js/**
+**/.DS_Store
+**/__pycache__
+**/.env*
+**/*.pem
+**/*.key
